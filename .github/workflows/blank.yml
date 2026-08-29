@@ -1,27 +1,46 @@
-- name: Android Build, Sign & Release
-  # You may pin to the exact commit or the version.
-  # uses: FreetimeMaker/android-ci-action@e7ade07b0b685a6fe6392d72a331909179bf14fc
-  uses: FreetimeMaker/android-ci-action@v1.2.0
-  with:
-    # Base64 encoded keystore (ignored if use_repo_keystore=true)
-    keystore: # optional
-    # 
-    keystore_password: 
-    # 
-    key_alias: 
-    # 
-    key_password: 
-    # Gradle task to run
-    gradle_task: # optional, default is assembleRelease
-    # Use a keystore stored in the repository
-    use_repo_keystore: # optional, default is false
-    # Path to the repo keystore
-    repo_keystore_path: # optional, default is release-key.jks
-    # Automatically create git tag based on versionName
-    auto_tag: # optional, default is true
-    # Enable VirusTotal scanning before signing
-    virustotal_scan: # optional, default is false
-    # VirusTotal API key
-    virustotal_api_key: # optional
-    # Max seconds to wait for VirusTotal analysis
-    virustotal_timeout: # optional, default is 120
+steps:
+  - name: Checkout Code
+    uses: actions/checkout@v4
+
+  - name: Set up JDK 17
+    uses: actions/setup-java@v4
+    with:
+      java-version: '17'
+      distribution: 'temurin'
+      cache: 'gradle'
+
+  - name: Make gradlew executable
+    run: chmod +x gradlew
+
+  # Option 1: Single-Step Custom Action (Cleaned & Formatted)
+  - name: Android Build, Sign & Release
+    uses: FreetimeMaker/android-ci-action@v1.2.0
+    with:
+      keystore: ${{ secrets.KEYSTORE_BASE64 }}
+      keystore_password: ${{ secrets.KEYSTORE_PASSWORD }}
+      key_alias: ${{ secrets.KEY_ALIAS }}
+      key_password: ${{ secrets.KEY_PASSWORD }}
+      gradle_task: assembleRelease
+      auto_tag: true
+
+  # Option 2: Alternative 3-Step Pipeline (Uncomment if needed)
+  # - name: Build Release APK
+  #   run: ./gradlew assembleRelease
+  #
+  # - name: Sign Android Release
+  #   id: sign_app
+  #   uses: r0adkll/sign-android-release@v1
+  #   with:
+  #     releaseDirectory: app/build/outputs/apk/release
+  #     signingKeyBase64: ${{ secrets.KEYSTORE_BASE64 }}
+  #     alias: ${{ secrets.KEY_ALIAS }}
+  #     keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+  #     keyPassword: ${{ secrets.KEY_PASSWORD }}
+  #
+  # - name: Create GitHub Release
+  #   uses: softprops/action-gh-release@v2
+  #   with:
+  #     files: ${{ steps.sign_app.outputs.signedReleaseFile }}
+  #   env:
+  #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
