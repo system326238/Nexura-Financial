@@ -1,6 +1,0 @@
-{
-  "name": "Nexura Financial",
-  "description": "Futuristic AI-powered personal financial operating system, forensic bill analyzer, and wealth intelligence platform.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
